@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Live Location Tracker</string>
+    <string-array name="Spinner_items">
+        <item>Active</item>
+        <item>Inactive</item>
+    </string-array>
+    <string-array name="Spinner_items2">
+        <item>Inactive</item>
+        <item>Active</item>
+    </string-array>
+
+    <string-array name="Spinner_items1">
+        <item>Active</item>
+        <item>Inactive</item>
+    </string-array>
+
+</resources>

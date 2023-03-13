@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1b1b2c"
+    tools:context=".CreateUser">
+    <TextView
+        android:id="@+id/adminhead1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="20sp"
+        android:textColor="@android:color/white"
+        android:textAlignment="center"
+        android:text="Create User"
+        android:padding="10dp"/>
+
+    <EditText
+        android:layout_below="@+id/adminhead1"
+        android:id="@+id/name"
+        android:hint="Enter Name.."
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+    <EditText
+        android:id="@+id/empid"
+        android:hint="Enter EmpId.."
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/name"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+    <EditText
+        android:id="@+id/address"
+        android:hint="Enter Address.."
+        android:layout_below="@+id/empid"
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+    <EditText
+        android:id="@+id/phonenumber"
+        android:hint="Enter Phone Number.."
+        android:layout_below="@+id/address"
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+    <EditText
+        android:id="@+id/emailid"
+        android:hint="Enter EmailId.."
+        android:layout_below="@+id/phonenumber"
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+    <EditText
+        android:id="@+id/createuserpassword"
+        android:hint="Enter Password.."
+        android:layout_below="@+id/emailid"
+        android:textColorHint="@android:color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/input_design"
+        android:padding="10dp"
+        android:textColor="@android:color/white"/>
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/createuserpassword"
+        android:id="@+id/statusspinner"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:textAlignment="center"
+        android:entries="@array/Spinner_items"
+        />
+    <Button
+        android:id="@+id/createuserbtn"
+        android:layout_below="@+id/statusspinner"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create User"
+        android:background="@drawable/buttons"
+        android:padding="20dp"
+        />
+
+
+</RelativeLayout>
