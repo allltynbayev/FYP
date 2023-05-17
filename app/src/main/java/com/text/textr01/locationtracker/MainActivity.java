@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     String UsernameText,PasswordText;
     String adminusername,adminpassword;
 
-    String Etphone,Etpass,Status;
+    String Etphone,Etpass,Status, Bus_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
                 MODE_PRIVATE);
         String s1 = sh.getString("active", "");
         String s2 = sh.getString("phone", "");
+        String s3 = sh.getString("busid", "");
 
         if(s1.equals("admin"))
         {
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         {
             Intent i=new Intent(MainActivity.this,UserActivty.class);
             i.putExtra("phone",s2);
+            i.putExtra("busid",s2);
             startActivity(i);
         }
 
@@ -126,8 +128,9 @@ public class MainActivity extends AppCompatActivity {
                                     Etphone=dataSnapshot.child(UsernameText).child("phone").getValue().toString();
                                     Etpass=dataSnapshot.child(UsernameText).child("password").getValue().toString();
                                     Status=dataSnapshot.child(UsernameText).child("status").getValue().toString();
+                                    Bus_id=dataSnapshot.child(UsernameText).child("busid").getValue().toString();
 
-                                    Login(Etphone,Etpass,Status);
+                                    Login(Etphone,Etpass,Status,Bus_id);
                                 }
                                 else
                                 {
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void Login(String etphone, String etpass,String status) {
+    private void Login(String etphone, String etpass,String status, String busid) {
         if(UsernameText.equals(etphone))
         {
             if(PasswordText.equals(etpass))
@@ -176,10 +179,14 @@ public class MainActivity extends AppCompatActivity {
                     myEdit.putString(
                             "phone",
                             etphone);
+                    myEdit.putString(
+                            "busid",
+                            busid);
                     myEdit.commit();
 
                     Intent i=new Intent(MainActivity.this,UserActivty.class);
                     i.putExtra("phone",etphone);
+                    i.putExtra("busid",busid);
                     startActivity(i);
                 }
                 else

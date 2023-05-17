@@ -5,6 +5,7 @@ public class User {
     String empid;
     String address;
     String phone;
+    String busid;
     String email;
     String password;
     String status;
@@ -19,6 +20,7 @@ public class User {
         this.empid = empid;
         this.address = address;
         this.phone = phone;
+        this.busid = busid;
         this.email = email;
         this.password = password;
         this.status = status;
@@ -50,6 +52,9 @@ public class User {
 
     public String getPhone() {
         return phone;
+    }
+    public String getBusid() {
+        return busid;
     }
 
     public void setPhone(String phone) {

@@ -48,7 +48,7 @@ public class UserList extends AppCompatActivity {
                 for(DataSnapshot ds:dataSnapshot.getChildren())
                 {
                     user=ds.getValue(User.class);
-                    list.add("Phone : "+user.getPhone()+"\n"+"EmpID : "+user.getEmpid()+"\n"+"Address : "+user.getAddress()+
+                    list.add("Phone : "+user.getPhone()+"\n"+user.getBusid()+"\n"+"EmpID : "+user.getEmpid()+"\n"+"Address : "+user.getAddress()+
                             "\n"+"Name : "+user.getName()+"\n"+"Email : "+user.getEmail()
                             +"\n"+"Password : "+user.getPassword()+"\n"+"Status : "+user.getStatus());
                 }

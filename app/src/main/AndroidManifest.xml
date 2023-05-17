@@ -16,6 +16,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB9AAAhaGKkuI7S1D2RSnnpU6vwt6UTT9g"/>
         <activity android:name=".UserUpdatePassword" />
         <activity android:name=".UserActivty" />
         <activity android:name=".AdminUpdatePassword" />
