@@ -72,8 +72,8 @@
         android:padding="10dp"
         android:textColor="@android:color/white"/>
     <EditText
-        android:id="@+id/emailid"
-        android:hint="Enter EmailId.."
+        android:id="@+id/bus_id"
+        android:hint="Enter BusId.."
         android:layout_below="@+id/phonenumber"
         android:textColorHint="@android:color/white"
         android:layout_width="match_parent"
@@ -87,7 +87,7 @@
     <EditText
         android:id="@+id/createuserpassword"
         android:hint="Enter Password.."
-        android:layout_below="@+id/emailid"
+        android:layout_below="@+id/bus_id"
         android:textColorHint="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

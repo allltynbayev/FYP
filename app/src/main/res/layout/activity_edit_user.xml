@@ -62,7 +62,7 @@
 
     <EditText
         android:id="@+id/editemailid"
-        android:hint="Enter EmailId.."
+        android:hint="Enter Bus Id.."
         android:layout_below="@+id/editaddress"
         android:textColorHint="@android:color/white"
         android:layout_width="match_parent"

@@ -12,8 +12,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,9 +28,22 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,8 +51,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class UserActivty extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -51,11 +68,15 @@ public class UserActivty extends AppCompatActivity implements GoogleApiClient.Co
 
     private int permissionCode = 1;
 
+    private GoogleMap map;
+    private SupportMapFragment supportMapFragment;
 
     String phone;
+    String busid;
     RelativeLayout relativeLayout;
     TextView trackModetv, Taptv;
     String date;
+    private FusedLocationProviderClient fusedLocationClient;
 
     ProgressDialog loadingBar;
     String mode;
@@ -64,6 +85,100 @@ public class UserActivty extends AppCompatActivity implements GoogleApiClient.Co
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_activty);
+
+        supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.google_map);
+        supportMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                map = googleMap;
+
+                // Coordinates for Bishkek
+                LatLng Bishkek = new LatLng(42.8746, 74.5698);
+
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(Bishkek, 13));
+                if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+
+                    return;
+                }
+                map.setMyLocationEnabled(true);
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(UserActivty.this);
+
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(UserActivty.this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                // Got last known location. In some rare situations, this can be null.
+                                if (location != null) {
+                                    LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+                                }
+                            }
+                        });
+
+                final DatabaseReference driversRef = FirebaseDatabase.getInstance().getReference().child("Drivers").child(busid);
+                driversRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+
+                            map.clear(); // Clear previous markers
+                            List<LatLng> points = new ArrayList<>();
+                            points.add(new LatLng(42.7477, 74.2344)); // San Francisco
+                            points.add(new LatLng(41.5477, 76.2344)); // Los Angeles
+                            points.add(new LatLng(43.5477, 73.2344));
+                            points.add(new LatLng(42.7477, 74.2344));
+                            // Add the polyline to the map
+                            PolylineOptions polylineOptions = new PolylineOptions().addAll(points).width(10).color(Color.BLUE);
+                            map.addPolyline(polylineOptions);
+
+                            LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+
+                            int counter = 0;
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                String locationName = snapshot.child("locationname").getValue(String.class);
+                                String driverName = snapshot.child("name").getValue(String.class);
+
+                                if (locationName != null) {
+                                    double latD = Double.parseDouble(locationName.split(" ")[0]);
+                                    double longtD = Double.parseDouble(locationName.split(" ")[1]);
+
+                                    MarkerOptions marker = new MarkerOptions().position(new LatLng(latD, longtD)).title("Bus Driver " + driverName);
+                                    map.addMarker(marker);
+
+                                    counter++;
+
+
+                                    boundsBuilder.include(new LatLng(latD, longtD));
+                                }
+                            }
+                            // bounds is not empty
+                            LatLngBounds bounds = boundsBuilder.build();
+
+                            int padding = 100; // Adjust as needed
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                            map.animateCamera(cameraUpdate);
+
+                        } else {
+
+                            Toast.makeText(UserActivty.this, "Could not find BUS ID", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle error
+                    }
+                });
+            }
+        });
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 // The next two lines tell the new client that “this” current class will handle connection stuff
@@ -82,6 +197,7 @@ public class UserActivty extends AppCompatActivity implements GoogleApiClient.Co
 
         Intent i = getIntent();
         phone = i.getStringExtra("phone");
+        busid = i.getStringExtra("busid");
 
         loadingBar = new ProgressDialog(this);
 
@@ -122,84 +238,128 @@ public class UserActivty extends AppCompatActivity implements GoogleApiClient.Co
 
             }
         });
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        final LocationCallback locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        currentLatitude = location.getLatitude();
+                        currentLongitude = location.getLongitude();
+                        RootRef.child("Drivers").child(busid).child(phone).child("mode").setValue("off");
+
+                        Toast.makeText(UserActivty.this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
+                        saveLocationToDB(currentLatitude, currentLongitude);
+                    }
+                }
+            }
+        };
         relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mode.equals("on")) {
-                    RootRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    RootRef.child("Drivers").child(busid).child(phone).child("mode").setValue("off");
+                    RootRef.child("Users").child(phone).child("mode").setValue("off");
+                    fusedLocationClient.removeLocationUpdates(locationCallback);
 
-                            RootRef.child("Users").child(phone).child("mode").setValue("off");
-                            String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
-
-                            RootRef.child("Users").child(phone).child(date).child("modeoffdatetime").setValue(currentDateTimeString);
-
-
-                            if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                                return;
-                            }
-                            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-                            if (location == null) {
-                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, UserActivty.this);
-
-                            } else {
-                                currentLatitude = location.getLatitude();
-                                currentLongitude = location.getLongitude();
-
-                                Toast.makeText(UserActivty.this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
-
-                                saveLocationToDB(currentLatitude, currentLongitude);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+//                    RootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//
+//                            RootRef.child("Users").child(phone).child("mode").setValue("off");
+//                            RootRef.child("Drivers").child(busid).child(phone).child("mode").setValue("off");
+//
+//                            String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+//
+//                            RootRef.child("Users").child(phone).child(date).child("modeoffdatetime").setValue(currentDateTimeString);
+//                            RootRef.child("Drivers").child(busid).child(phone).child("modeoffdatetime").setValue(currentDateTimeString);
+//
+//
+//                            if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//
+//                                return;
+//                            }
+//                            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//
+//                            if (location == null) {
+//                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, UserActivty.this);
+//
+//                            } else {
+//                                currentLatitude = location.getLatitude();
+//                                currentLongitude = location.getLongitude();
+//
+//                                Toast.makeText(UserActivty.this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
+//
+//                                saveLocationToDB(currentLatitude, currentLongitude);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                        }
+//                    });
                 } else if (mode.equals("off")) {
-                    RootRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                            RootRef.child("Users").child(phone).child("mode").setValue("on");
-                            date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                            String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+                    RootRef.child("Users").child(phone).child("mode").setValue("on");
+                    RootRef.child("Drivers").child(busid).child(phone).child("mode").setValue("on");
+                    // Request location updates
+                    LocationRequest locationRequest = LocationRequest.create();
+                    locationRequest.setInterval(5000);  // Set desired interval for active location updates, in milliseconds.
+                    locationRequest.setFastestInterval(5000);  // Set the fastest rate for active location updates, in milliseconds.
+                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-                            HashMap<String, Object> userDataMap = new HashMap<>();
-                            userDataMap.put("modeondatetime", currentDateTimeString);
-                            userDataMap.put("locationname", "");
-                            userDataMap.put("modeoffdatetime", "");
+                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
 
-                            RootRef.child("Users").child(phone).child(date).updateChildren(userDataMap);
 
-                            if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                                return;
-                            }
-                            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-                            if (location == null) {
-                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, UserActivty.this);
-
-                            } else {
-                                currentLatitude = location.getLatitude();
-                                currentLongitude = location.getLongitude();
-
-                                Toast.makeText(UserActivty.this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
-
-                                saveLocationToDB(currentLatitude, currentLongitude);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+//                    RootRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//
+//                            RootRef.child("Users").child(phone).child("mode").setValue("on");
+//                            RootRef.child("Drivers").child(busid).child(phone).child("mode").setValue("on");
+//
+//                            date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+//                            String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
+//
+//                            HashMap<String, Object> userDataMap = new HashMap<>();
+//                            userDataMap.put("modeondatetime", currentDateTimeString);
+//                            userDataMap.put("locationname", " ");
+//                            userDataMap.put("modeoffdatetime", "");
+//
+//                            RootRef.child("Users").child(phone).child(date).updateChildren(userDataMap);
+//                            RootRef.child("Drivers").child(busid).child(phone).updateChildren(userDataMap);
+//                            if (ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(UserActivty.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//
+//                                return;
+//                            }
+//                            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//
+//                            if (location == null) {
+//                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, UserActivty.this);
+//
+//                            } else {
+//                                currentLatitude = location.getLatitude();
+//                                currentLongitude = location.getLongitude();
+//
+//                                Toast.makeText(UserActivty.this, currentLatitude + " WORKS " + currentLongitude + "", Toast.LENGTH_LONG).show();
+//
+//                                saveLocationToDB(currentLatitude, currentLongitude);
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                        }
+//                    });
                 }
 
             }
@@ -364,9 +524,10 @@ public class UserActivty extends AppCompatActivity implements GoogleApiClient.Co
         String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
 
         HashMap<String, Object> userDataMap = new HashMap<>();
-        userDataMap.put("locationname", String.valueOf(currentLatitude)+String.valueOf(currentLongitude));
+        userDataMap.put("locationname", String.valueOf(currentLatitude)+" "+String.valueOf(currentLongitude));
 
         RootRef.child("Users").child(phone).child(date).updateChildren(userDataMap);
+        RootRef.child("Drivers").child(busid).child(phone).updateChildren(userDataMap);
 
     }
 

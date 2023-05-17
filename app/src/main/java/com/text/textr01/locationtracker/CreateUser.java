@@ -3,6 +3,7 @@ package com.text.textr01.locationtracker;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class CreateUser extends AppCompatActivity implements AdapterView.OnItemS
     ProgressDialog loadingBar;
     Spinner statusSpinner;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +47,7 @@ public class CreateUser extends AppCompatActivity implements AdapterView.OnItemS
         EmpId=(EditText)findViewById(R.id.empid);
         Address=(EditText)findViewById(R.id.address);
         PhoneNumber=(EditText)findViewById(R.id.phonenumber);
-        EmailId=(EditText)findViewById(R.id.emailid);
+        EmailId=(EditText)findViewById(R.id.bus_id);
         Password=(EditText)findViewById(R.id.createuserpassword);
 
         CreateUserButton=(Button)findViewById(R.id.createuserbtn);
@@ -119,7 +121,7 @@ public class CreateUser extends AppCompatActivity implements AdapterView.OnItemS
                     userDataMap.put("empid",empIdtxt);
                     userDataMap.put("address",addresstxt);
                     userDataMap.put("phone",phoneNumbertxt);
-                    userDataMap.put("email",emailIdtxt);
+                    userDataMap.put("busid",emailIdtxt);
                     userDataMap.put("password",passwordtxt);
                     userDataMap.put("status",Statustxt);
                     userDataMap.put("mode","off");

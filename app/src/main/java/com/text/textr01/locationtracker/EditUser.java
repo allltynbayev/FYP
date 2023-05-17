@@ -127,7 +127,7 @@ public class EditUser extends AppCompatActivity implements AdapterView.OnItemSel
                 }
                 else if (TextUtils.isEmpty(EditEmailIdtxt))
                 {
-                    Toast.makeText(EditUser.this, "Please enter emailid...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditUser.this, "Please enter bus id...", Toast.LENGTH_SHORT).show();
                 }
                 else if (TextUtils.isEmpty(EditPasswordtxt))
                 {
@@ -162,7 +162,7 @@ public class EditUser extends AppCompatActivity implements AdapterView.OnItemSel
                     userDataMap.put("name",editNametxt);
                     userDataMap.put("empid",editEmpIdtxt);
                     userDataMap.put("address",editAddresstxt);
-                    userDataMap.put("email",editEmailIdtxt);
+                    userDataMap.put("busid",editEmailIdtxt);
                     userDataMap.put("password",editPasswordtxt);
                     userDataMap.put("status",currentStatus);
 
